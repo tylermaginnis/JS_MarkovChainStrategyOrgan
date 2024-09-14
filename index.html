@@ -41,12 +41,11 @@
     let isPlaying = false;
     let oscillators = [];
     let schedulerId;
-    let chordCounter = 0;  // Keep track of the number of chords played
-    const chordLimit = 10; // Define a limit for how many chords can be played
+    let chordCounter = 0;
     const tempo = 90; // BPM for a rich, solemn feel
     const secondsPerBeat = 60 / tempo;
-    const lookahead = 25.0; // How frequently to call scheduling function (in milliseconds)
-    const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
+    const lookahead = 25.0;
+    const scheduleAheadTime = 0.1;
     let nextNoteTime = 0.0;
     let currentChordStrategy = 'tonic';
     let currentMelodyStrategy = 'stepwise';
@@ -137,15 +136,18 @@
     };
 
     // Organ Oscillator
-    function createOrganOscillator(frequency, startTime, duration) {
+    function createOrganOscillator(frequency, startTime, duration, isChord = false) {
       const osc1 = audioContext.createOscillator();
       const gainNode1 = audioContext.createGain();
 
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(frequency, startTime);
+      osc1.detune.value = Math.random() * 2 - 1; // Slight detune for realism
+
+      const targetGain = isChord ? 0.3 : 0.7; // Chords lower volume
       gainNode1.gain.setValueAtTime(0, startTime);
-      gainNode1.gain.linearRampToValueAtTime(0.6, startTime + 0.05);
-      gainNode1.gain.linearRampToValueAtTime(0.4, startTime + duration - 0.05);
+      gainNode1.gain.linearRampToValueAtTime(targetGain, startTime + 0.05);
+      gainNode1.gain.linearRampToValueAtTime(targetGain * 0.8, startTime + duration - 0.05);
       gainNode1.gain.linearRampToValueAtTime(0, startTime + duration);
 
       osc1.connect(gainNode1);
@@ -154,17 +156,15 @@
       osc1.start(startTime);
       osc1.stop(startTime + duration);
 
-      // Track oscillator for stopping
       oscillators.push({ osc1, gainNode1 });
-
-      logToConsole(`Organ Chord played: ${frequency.toFixed(2)}Hz from ${startTime.toFixed(2)}s to ${(startTime + duration).toFixed(2)}s`);
+      logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: ${frequency.toFixed(2)}Hz from ${startTime.toFixed(2)}s to ${(startTime + duration).toFixed(2)}s`);
     }
 
     // Play a chord
     function playChord(chord, currentTime) {
       logToConsole(`Chord Strategy: ${currentChordStrategy}`);
       chord.forEach(frequency => {
-        createOrganOscillator(frequency, currentTime, secondsPerBeat);
+        createOrganOscillator(frequency, currentTime, secondsPerBeat, true);
       });
     }
 
@@ -174,13 +174,13 @@
       pattern.forEach((beatDuration, index) => {
         const startTime = currentTime + index * beatDuration * secondsPerBeat;
         const frequency = melodyStrategies[currentMelodyStrategy]();
-        createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat);
+        createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat, false);
       });
     }
 
     // Scheduler function
     function scheduler() {
-      while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
+      while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
         playMusic(nextNoteTime);
         scheduleNextNote();
       }
@@ -194,12 +194,6 @@
 
     // Play music
     function playMusic(currentTime) {
-      if (chordCounter >= chordLimit) {
-        logToConsole('Chord limit reached. Resetting...');
-        chordCounter = 0;
-        currentChordStrategy = 'tonic'; // Reset to tonic or any strategy
-      }
-
       const chord = chordStrategies[currentChordStrategy]();
       playChord(chord, currentTime);
 
@@ -209,8 +203,6 @@
 
       currentChordStrategy = getNextStrategy(currentChordStrategy, chordStrategyMarkovMatrix);
       currentMelodyStrategy = getNextStrategy(currentMelodyStrategy, melodyStrategyMarkovMatrix);
-
-      chordCounter++; // Increment chord counter
     }
 
     // Start playing music
@@ -231,7 +223,6 @@
       clearTimeout(schedulerId);
       logToConsole('Music playback stopped.');
 
-      // Stop all oscillators
       oscillators.forEach(({ osc1, gainNode1 }) => {
         osc1.stop();
         gainNode1.disconnect();

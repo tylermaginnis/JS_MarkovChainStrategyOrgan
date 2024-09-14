@@ -1,6 +1,6 @@
 # Infinite Harmonious Organ Composition
 
-![Organ Composition](https://tylermaginnis.github.io/JS_MarkovChainStrategyOrgan/)) <!-- Replace with actual screenshot URL -->
+[Organ Composition Live Demo](https://tylermaginnis.github.io/JS_MarkovChainStrategyOrgan/) <!-- Replace with actual screenshot URL -->
 
 ## Table of Contents
 

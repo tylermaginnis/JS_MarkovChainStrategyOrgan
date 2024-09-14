@@ -1,3 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advanced Organ Composition with Markov Chains</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f0f0f0;
+    }
+    button {
+      font-size: 18px;
+      padding: 12px 24px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #console {
+      width: 80%;
+      height: 300px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #1e1e1e;
+      color: #dcdcdc;
+      border: 1px solid #444;
+      overflow-y: scroll;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Advanced Organ Composition with Markov Chains</h1>
+  <button id="playButton">Play</button>
+  <button id="stopButton" disabled>Stop</button>
+  <div id="console"></div>
+
+  <script>
+    let audioContext;
+    let isPlaying = false;
+    let oscillators = [];
+    let schedulerId;
+    let chordCounter = 0;  // Keep track of the number of chords played
+    const chordLimit = 10; // Define a limit for how many chords can be played
+    const tempo = 90; // BPM for a rich, solemn feel
+    const secondsPerBeat = 60 / tempo;
+    const lookahead = 25.0; // How frequently to call scheduling function (in milliseconds)
+    const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
+    let nextNoteTime = 0.0;
+    let currentChordStrategy = 'tonic';
+    let currentMelodyStrategy = 'stepwise';
+    let currentMelodyIndex = 0;
+
+    const consoleDiv = document.getElementById('console');
+    function logToConsole(message) {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = message;
+      consoleDiv.appendChild(logMessage);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    // Define musical strategies for chords
+    const chordStrategies = {
+      tonic: () => [261.63, 329.63, 392.00, 523.25], // C major 7
+      dominant: () => [392.00, 493.88, 587.33, 784.00], // G major 7
+      subdominant: () => [349.23, 440.00, 523.25, 698.46], // F major 7
+      minor: () => [293.66, 369.99, 440.00, 587.33], // D minor 7
+      diminished: () => [493.88, 622.25, 739.99, 987.77] // B diminished 7
+    };
+
+    // Define musical strategies for melodies
+    const melodyStrategies = {
+      stepwise: generateStepwiseMelody,
+      leap: generateLeapingMelody,
+      motif: generateMotifMelody,
+      arpeggio: generateArpeggioMelody
+    };
+
+    // Define scale (C major for simplicity)
+    const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.26, 698.46, 784.00, 880.00, 987.77, 1046.50];
+
+    // Melody generation functions
+    function generateStepwiseMelody() {
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + direction));
+      return scale[currentMelodyIndex];
+    }
+
+    function generateLeapingMelody() {
+      const leap = Math.random() < 0.5 ? 2 : 3;
+      currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + (Math.random() < 0.5 ? -leap : leap)));
+      return scale[currentMelodyIndex];
+    }
+
+    function generateMotifMelody() {
+      const motif = [261.63, 293.66, 329.63];
+      return motif[currentMelodyIndex++ % motif.length];
+    }
+
+    function generateArpeggioMelody() {
+      const chord = chordStrategies[currentChordStrategy]();
+      return chord[currentMelodyIndex++ % chord.length];
+    }
+
+    // Function to get next strategy based on Markov matrix
+    function getNextStrategy(currentStrategy, markovMatrix) {
+      const transitions = markovMatrix[currentStrategy];
+      const strategies = Object.keys(transitions);
+      const probabilities = Object.values(transitions);
+      const randomValue = Math.random();
+      let cumulativeProbability = 0;
+
+      for (let i = 0; i < strategies.length; i++) {
+        cumulativeProbability += probabilities[i];
+        if (randomValue < cumulativeProbability) {
+          return strategies[i];
+        }
+      }
+      return currentStrategy; // Fallback to current strategy
+    }
+
+    // Markov Chain Transition Matrices
+    const chordStrategyMarkovMatrix = {
+      tonic: { tonic: 0.5, dominant: 0.3, subdominant: 0.1, minor: 0.05, diminished: 0.05 },
+      dominant: { tonic: 0.4, dominant: 0.4, subdominant: 0.1, minor: 0.05, diminished: 0.05 },
+      subdominant: { tonic: 0.3, dominant: 0.3, subdominant: 0.3, minor: 0.05, diminished: 0.05 },
+      minor: { tonic: 0.3, dominant: 0.2, subdominant: 0.2, minor: 0.2, diminished: 0.1 },
+      diminished: { tonic: 0.4, dominant: 0.2, subdominant: 0.1, minor: 0.1, diminished: 0.2 }
+    };
+
+    const melodyStrategyMarkovMatrix = {
+      stepwise: { stepwise: 0.6, leap: 0.2, motif: 0.1, arpeggio: 0.1 },
+      leap: { stepwise: 0.3, leap: 0.5, motif: 0.1, arpeggio: 0.1 },
+      motif: { stepwise: 0.2, leap: 0.2, motif: 0.5, arpeggio: 0.1 },
+      arpeggio: { stepwise: 0.2, leap: 0.2, motif: 0.1, arpeggio: 0.5 }
+    };
+
+    // Organ Oscillator
+    function createOrganOscillator(frequency, startTime, duration) {
+      const osc1 = audioContext.createOscillator();
+      const gainNode1 = audioContext.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(frequency, startTime);
+      gainNode1.gain.setValueAtTime(0, startTime);
+      gainNode1.gain.linearRampToValueAtTime(0.6, startTime + 0.05);
+      gainNode1.gain.linearRampToValueAtTime(0.4, startTime + duration - 0.05);
+      gainNode1.gain.linearRampToValueAtTime(0, startTime + duration);
+
+      osc1.connect(gainNode1);
+      gainNode1.connect(audioContext.destination);
+
+      osc1.start(startTime);
+      osc1.stop(startTime + duration);
+
+      // Track oscillator for stopping
+      oscillators.push({ osc1, gainNode1 });
+
+      logToConsole(`Organ Chord played: ${frequency.toFixed(2)}Hz from ${startTime.toFixed(2)}s to ${(startTime + duration).toFixed(2)}s`);
+    }
+
+    // Play a chord
+    function playChord(chord, currentTime) {
+      logToConsole(`Chord Strategy: ${currentChordStrategy}`);
+      chord.forEach(frequency => {
+        createOrganOscillator(frequency, currentTime, secondsPerBeat);
+      });
+    }
+
+    // Play melody based on rhythm pattern
+    function playMelody(pattern, currentTime) {
+      logToConsole(`Melody Strategy: ${currentMelodyStrategy}`);
+      pattern.forEach((beatDuration, index) => {
+        const startTime = currentTime + index * beatDuration * secondsPerBeat;
+        const frequency = melodyStrategies[currentMelodyStrategy]();
+        createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat);
+      });
+    }
+
+    // Scheduler function
+    function scheduler() {
+      while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
+        playMusic(nextNoteTime);
+        scheduleNextNote();
+      }
+      schedulerId = setTimeout(scheduler, lookahead);
+    }
+
+    // Schedule next note
+    function scheduleNextNote() {
+      nextNoteTime += secondsPerBeat;
+    }
+
+    // Play music
+    function playMusic(currentTime) {
+      if (chordCounter >= chordLimit) {
+        logToConsole('Chord limit reached. Resetting...');
+        chordCounter = 0;
+        currentChordStrategy = 'tonic'; // Reset to tonic or any strategy
+      }
+
+      const chord = chordStrategies[currentChordStrategy]();
+      playChord(chord, currentTime);
+
+      const rhythmPattern = rhythmPatterns[Math.floor(Math.random() * rhythmPatterns.length)];
+      logToConsole(`Rhythm Pattern: ${rhythmPattern}`);
+      playMelody(rhythmPattern, currentTime);
+
+      currentChordStrategy = getNextStrategy(currentChordStrategy, chordStrategyMarkovMatrix);
+      currentMelodyStrategy = getNextStrategy(currentMelodyStrategy, melodyStrategyMarkovMatrix);
+
+      chordCounter++; // Increment chord counter
+    }
+
+    // Start playing music
+    function startPlaying() {
+      if (isPlaying) return;
+      isPlaying = true;
+
+      initializeAudio();
+      logToConsole('Music playback started.');
+      nextNoteTime = audioContext.currentTime;
+      scheduler();
+    }
+
+    // Stop playing music
+    function stopPlaying() {
+      if (!isPlaying) return;
+      isPlaying = false;
+      clearTimeout(schedulerId);
+      logToConsole('Music playback stopped.');
+
+      // Stop all oscillators
+      oscillators.forEach(({ osc1, gainNode1 }) => {
+        osc1.stop();
+        gainNode1.disconnect();
+      });
       oscillators = [];
     }
 
@@ -27,3 +265,12 @@
 
     // Rhythm patterns for melody
     const rhythmPatterns = [
+      [1, 0.5, 0.5, 1, 0.5, 0.5, 1],
+      [1, 1, 0.5, 0.5, 1, 1, 1],
+      [0.5, 0.5, 0.5, 0.5, 1, 1],
+      [1, 0.25, 0.25, 1, 0.5, 0.5, 1],
+      [0.25, 0.25, 0.5, 0.5, 1, 1, 1]
+    ];
+  </script>
+</body>
+</html>

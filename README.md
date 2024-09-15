@@ -26,6 +26,7 @@ This project demonstrates an advanced organ composition system using Markov Chai
 - **Mute Controls**: Mute or unmute chords and melody separately.
 - **Visual Feedback**: Display the current chord, melody, and strategies being used.
 - **Console Logs**: View detailed logs of the composition process, including rhythm patterns and frequency information.
+- **Dark Mode**: Toggle between light and dark modes for better visual comfort.
 
 ## How to Use
 
@@ -42,6 +43,7 @@ This project demonstrates an advanced organ composition system using Markov Chai
 4. **Play/Stop**: Click the "Play" button to start the composition. Click the "Stop" button to stop the composition.
 5. **Visual Feedback**: Observe the current chord, melody, and strategies in the visual feedback section.
 6. **Console Logs**: View detailed logs in the console section to see the rhythm patterns, frequencies, and other information.
+7. **Dark Mode**: Toggle the "Dark Mode" checkbox to switch between light and dark modes.
 
 ## Techniques and Strategies
 

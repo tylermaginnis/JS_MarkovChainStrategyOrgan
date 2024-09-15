@@ -211,6 +211,8 @@
   body.light-mode .frequency {
     color: #4b626d; font-weight:bold; /* blue */
   }
+
+
   </style>
 </head>
 <body>
@@ -221,7 +223,7 @@
     <!-- Tempo Control -->
     <div class="control-group">
       <label for="tempo">Tempo: <span id="tempoValue">90</span> BPM</label>
-      <input type="range" id="tempo" min="60" max="180" value="90">
+      <input type="range" id="tempo" min="30" max="180" value="90">
     </div>
     
     <!-- Master Volume Control -->
@@ -246,6 +248,19 @@
     <div class="control-group">
       <label for="reverb">Reverb Intensity</label>
       <input type="range" id="reverb" min="0" max="1" step="0.01" value="0.3">
+    </div>
+
+    <div class="control-group">
+      <label for="panning">Panning</label>
+      <input type="range" id="panning" min="-1" max="1" step="0.01" value="0">
+    </div>
+    <div class="control-group">
+      <label for="delayTime">Delay Time (ms)</label>
+      <input type="range" id="delayTime" min="0" max="1000" step="10" value="500">
+    </div>
+    <div class="control-group">
+      <label for="feedback">Delay Feedback</label>
+      <input type="range" id="feedback" min="0" max="1" step="0.01" value="0.5">
     </div>
     
     <!-- Chord Waveform Selection -->
@@ -611,61 +626,64 @@
 
     // Function to create a rich organ sound with careful layering
     function createOrganOscillator(frequency, startTime, duration, isChord = false, chord = []) {
-      if ((isChord && isChordsMuted) || (!isChord && isMelodyMuted)) {
-        return; // Skip creating oscillator if muted
-      }
-      const osc1 = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const panner = audioContext.createStereoPanner();
+  if ((isChord && isChordsMuted) || (!isChord && isMelodyMuted)) {
+    return; // Skip creating oscillator if muted
+  }
+  const osc1 = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  const panner = audioContext.createStereoPanner();
 
-      // Create filters
-      const lowPassFilter = audioContext.createBiquadFilter();
-      lowPassFilter.type = 'lowpass';
-      lowPassFilter.frequency.setValueAtTime(4000, startTime); // Increased cutoff frequency for a brighter sound
+  // Create filters
+  const lowPassFilter = audioContext.createBiquadFilter();
+  lowPassFilter.type = 'lowpass';
+  lowPassFilter.frequency.setValueAtTime(4000, startTime); // Increased cutoff frequency for a brighter sound
 
-      const highPassFilter = audioContext.createBiquadFilter();
-      highPassFilter.type = 'highpass';
-      highPassFilter.frequency.setValueAtTime(200, startTime); // Keep high pass frequency
+  const highPassFilter = audioContext.createBiquadFilter();
+  highPassFilter.type = 'highpass';
+  highPassFilter.frequency.setValueAtTime(200, startTime); // Keep high pass frequency
 
-      // Set waveforms based on whether it's a chord or melody
-      osc1.type = isChord ? chordWaveform : melodyWaveform;
-      osc1.frequency.setValueAtTime(frequency, startTime);
+  // Set waveforms based on whether it's a chord or melody
+  osc1.type = isChord ? chordWaveform : melodyWaveform;
+  osc1.frequency.setValueAtTime(frequency, startTime);
 
-      // Apply minimal detuning for chords to add richness
-      if (isChord && !isChordsMuted) {
-        osc1.detune.setValueAtTime(2, startTime); // Slight detuning
-      }
+  // Apply minimal detuning for chords to add richness
+  if (isChord && !isChordsMuted) {
+    osc1.detune.setValueAtTime(2, startTime); // Slight detuning
+  }
 
-      // Volume settings
-      const targetGain = isChord ? chordVolume : melodyVolume;
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.1); // Smooth attack
-      gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.1); // Sustain
-      gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Smooth release
+  // Volume settings
+  const targetGain = isChord ? chordVolume : melodyVolume;
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.1); // Smooth attack
+  gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.1); // Sustain
+  gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Smooth release
 
-      // Stereo Panning
-      panner.pan.setValueAtTime(isChord ? 0 : 0.2, startTime); // Center chords, slightly right for melody
+  // Stereo Panning
+  panner.pan.setValueAtTime(panningValue, startTime); // Use panning value from control
 
-      // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Panner -> Reverb -> Master Gain
-      osc1.connect(highPassFilter);
-      highPassFilter.connect(lowPassFilter);
-      lowPassFilter.connect(gainNode);
-      gainNode.connect(panner);
-      panner.connect(reverbNode);
-      reverbNode.connect(masterGain);
+  // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Panner -> Reverb -> Delay -> Master Gain
+  osc1.connect(highPassFilter);
+  highPassFilter.connect(lowPassFilter);
+  lowPassFilter.connect(gainNode);
+  gainNode.connect(panner);
+  panner.connect(reverbNode); // Connect to reverb node
+  reverbNode.connect(delayNode); // Connect to delay node
+  delayNode.connect(masterGain);
 
-      osc1.start(startTime);
-      osc1.stop(startTime + duration);
+  osc1.start(startTime);
+  osc1.stop(startTime + duration);
 
-      oscillators.push({ osc1, gainNode });
-      logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
-      // Update Visual Feedback
-      if (isChord) {
-        currentChordDiv.innerHTML = chord.map(freq => freq.toFixed(2) + 'Hz').join(', ');
-      } else {
-        currentMelodyDiv.innerHTML = frequency.toFixed(2) + 'Hz';
-      }
-    }
+  oscillators.push({ osc1, gainNode });
+  logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
+  // Update Visual Feedback
+  if (isChord) {
+    currentChordDiv.innerHTML = chord.map(freq => freq.toFixed(2) + 'Hz').join(', ');
+  } else {
+    currentMelodyDiv.innerHTML = frequency.toFixed(2) + 'Hz';
+  }
+}
+
+
 
     function playChord(chord, currentTime) {
       logBox(`=== Chord Strategy: <span class="chord">${currentChordStrategy.toUpperCase()}</span> ===`);
@@ -751,7 +769,21 @@
       melodyStrategySpan.textContent = '--';
     }
 
-      // Function to initialize audio context and nodes
+// Initialize variables for new effects
+let panningValue = 0;
+let delayTime = 0.5;
+let feedbackValue = 0.5;
+let delayNode;
+let feedbackGainNode;
+
+// DOM Elements for new controls
+const panningSlider = document.getElementById('panning');
+const delayTimeSlider = document.getElementById('delayTime');
+const feedbackSlider = document.getElementById('feedback');
+
+// Function to initialize audio context and nodes
+// Function to initialize audio context and nodes
+  // Function to initialize audio context and nodes
   function initializeAudio() {
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -762,15 +794,27 @@
 
       // Create and connect reverb
       reverbNode = createReverb(audioContext);
-      reverbNode.connect(masterGain);
 
       // Create EQ nodes and connect them in series
       eqNodes = createEQ(audioContext);
       eqNodes.reduce((prev, curr) => {
         prev.connect(curr);
         return curr;
-      }, reverbNode).connect(masterGain);
+      }, reverbNode);
 
+      // Create delay and feedback nodes
+      delayNode = audioContext.createDelay();
+      feedbackGainNode = audioContext.createGain();
+      delayNode.delayTime.setValueAtTime(delayTime, audioContext.currentTime);
+      feedbackGainNode.gain.setValueAtTime(feedbackValue, audioContext.currentTime);
+
+      // Connect delay nodes
+      delayNode.connect(feedbackGainNode);
+      feedbackGainNode.connect(delayNode);
+
+      // Connect nodes in the correct order
+      eqNodes[eqNodes.length - 1].connect(delayNode);
+      delayNode.connect(masterGain);
       masterGain.connect(audioContext.destination);
 
       // Create analyser node
@@ -792,13 +836,32 @@
       updateVisualizerColors(lightMode);
       startVisualization();
 
-      logToConsole('AudioContext initialized with reverb, EQ, and analyser.', 'info');
+      logToConsole('AudioContext initialized with reverb, EQ, delay, and analyser.', 'info');
     } else if (audioContext.state === 'suspended') {
       audioContext.resume().then(() => {
         logToConsole('AudioContext resumed after user interaction.', 'info');
       });
     }
   }
+
+
+// Event Listeners for new controls
+panningSlider.addEventListener('input', () => {
+  panningValue = parseFloat(panningSlider.value);
+  logToConsole(`Panning set to ${panningValue}`, 'info');
+});
+
+delayTimeSlider.addEventListener('input', () => {
+  delayTime = parseFloat(delayTimeSlider.value) / 1000; // Convert to seconds
+  delayNode.delayTime.setValueAtTime(delayTime, audioContext.currentTime);
+  logToConsole(`Delay Time set to ${delayTime * 1000} ms`, 'info');
+});
+
+feedbackSlider.addEventListener('input', () => {
+  feedbackValue = parseFloat(feedbackSlider.value);
+  feedbackGainNode.gain.setValueAtTime(feedbackValue, audioContext.currentTime);
+  logToConsole(`Delay Feedback set to ${feedbackValue}`, 'info');
+});
 
 
     // Event Listeners for Controls
@@ -949,30 +1012,42 @@
     });
   }
 
-  // Function to initialize audio context and nodes
-  function initializeAudio() {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
 
-      // Create master gain node
-      masterGain = audioContext.createGain();
-      masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
 
-      // Create and connect reverb
-      reverbNode = createReverb(audioContext);
-      reverbNode.connect(masterGain);
+  // Initialize audio context and nodes
+function initializeAudio() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-      // Create EQ nodes and connect them in series
-      eqNodes = createEQ(audioContext);
-      eqNodes.reduce((prev, curr) => {
-        prev.connect(curr);
-        return curr;
-      }, reverbNode).connect(masterGain);
+    // Create master gain node
+    masterGain = audioContext.createGain();
+    masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
 
-      masterGain.connect(audioContext.destination);
+    // Create and connect reverb
+    reverbNode = createReverb(audioContext);
 
-      // Create analyser node
-      analyser = audioContext.createAnalyser();
+    // Create delay and feedback nodes
+    delayNode = audioContext.createDelay();
+    feedbackGainNode = audioContext.createGain();
+    delayNode.delayTime.setValueAtTime(delayTime, audioContext.currentTime);
+    feedbackGainNode.gain.setValueAtTime(feedbackValue, audioContext.currentTime);
+    delayNode.connect(feedbackGainNode); // feedback loop
+    feedbackGainNode.connect(delayNode);
+
+    // Create EQ nodes and connect them in series
+    eqNodes = createEQ(audioContext);
+    eqNodes.reduce((prev, curr) => {
+      prev.connect(curr);
+      return curr;
+    }, reverbNode).connect(delayNode);
+
+    // Finally, connect to master gain
+    delayNode.connect(masterGain);
+    masterGain.connect(audioContext.destination);
+
+     // Create analyser node
+     analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048; // Set FFT size for better resolution
       masterGain.connect(analyser);
 
@@ -997,6 +1072,7 @@
       });
     }
   }
+
 
 
   // Ensure drawVisualization is called continuously

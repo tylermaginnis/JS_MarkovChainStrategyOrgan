@@ -1,174 +1,125 @@
-# Infinite Harmonious Organ Composition
+# Advanced Organ Composition with Markov Chains
 
-[Organ Composition Live Demo](https://tylermaginnis.github.io/JS_MarkovChainStrategyOrgan/) <!-- Replace with actual screenshot URL -->
+[Live Demo - Advanced Organ Composition with Markov Chains](https://tylermaginnis.github.io/JS_MarkovChainStrategyOrgan/)
 
 ## Table of Contents
-
-- [Overview](#overview)
-- [Technologies Used](#technologies-used)
-- [Algorithmic Techniques](#algorithmic-techniques)
-  - [Markov Chains](#markov-chains)
-  - [Generative Functions](#generative-functions)
-- [Musical Theories Implemented](#musical-theories-implemented)
-  - [Harmonic Functions](#harmonic-functions)
-  - [Melodic Strategies](#melodic-strategies)
-- [Scheduler and Timing](#scheduler-and-timing)
-- [Oscillator Management](#oscillator-management)
-- [Logging and Console Features](#logging-and-console-features)
-- [Limitations and Future Enhancements](#limitations-and-future-enhancements)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [License](#license)
+1. [Overview](#overview)
+2. [Features](#features)
+3. [How to Use](#how-to-use)
+4. [Techniques and Strategies](#techniques-and-strategies)
+   - [Chord Strategies](#chord-strategies)
+   - [Melody Strategies](#melody-strategies)
+   - [Rhythm Patterns](#rhythm-patterns)
+5. [Computer Science Techniques](#computer-science-techniques)
+6. [Music Theory Techniques](#music-theory-techniques)
 
 ## Overview
 
-The **Infinite Harmonious Organ Composition** is a web-based application that generates an endless, musically rich organ composition. Leveraging the power of the Web Audio API, Markov chains, and algorithmic generative functions, this project emulates the depth and complexity found in classical organ music, inspired by composers like Rachmaninoff.
+This project demonstrates an advanced organ composition system using Markov Chains. The system allows users to generate and manipulate organ music through various controls and strategies. The composition is driven by Markov Chains to determine the next chord and melody strategies, creating a dynamic and evolving musical piece.
 
-## Technologies Used
+## Features
 
-- **Web Technologies:**
-  - **HTML5:** Structure of the web page.
-  - **CSS3:** Styling and layout.
-  - **JavaScript (ES6):** Core logic for music generation and playback.
+- **Tempo Control**: Adjust the tempo of the composition between 60 and 180 BPM.
+- **Volume Control**: Control the master volume, chord volume, and melody volume independently.
+- **Reverb Control**: Adjust the intensity of the reverb effect.
+- **Waveform Selection**: Choose different waveforms for chords and melody (Sine, Triangle, Sawtooth, Square).
+- **Mute Controls**: Mute or unmute chords and melody separately.
+- **Visual Feedback**: Display the current chord, melody, and strategies being used.
+- **Console Logs**: View detailed logs of the composition process, including rhythm patterns and frequency information.
 
-- **Web Audio API:**
-  - Enables real-time audio synthesis and manipulation directly in the browser.
+## How to Use
 
-- **Algorithmic Techniques:**
-  - **Markov Chains:** For probabilistic transitions between musical strategies.
-  - **Generative Functions:** To dynamically create chords and melodies based on defined musical theories.
+1. **Open the Live Demo**: Click on the [Live Demo](https://your-live-demo-link.com) link to open the application in your browser.
+2. **Adjust Controls**: Use the sliders and dropdowns to adjust the tempo, volume, reverb intensity, and waveforms.
+   - **Tempo**: Move the slider to set the tempo (BPM).
+   - **Master Volume**: Adjust the overall volume of the composition.
+   - **Chord Volume**: Adjust the volume of the chords.
+   - **Melody Volume**: Adjust the volume of the melody.
+   - **Reverb Intensity**: Adjust the intensity of the reverb effect.
+   - **Chord Waveform**: Select the waveform for the chords.
+   - **Melody Waveform**: Select the waveform for the melody.
+3. **Mute/Unmute**: Click the "Mute Chords" or "Mute Melody" buttons to mute or unmute the respective parts.
+4. **Play/Stop**: Click the "Play" button to start the composition. Click the "Stop" button to stop the composition.
+5. **Visual Feedback**: Observe the current chord, melody, and strategies in the visual feedback section.
+6. **Console Logs**: View detailed logs in the console section to see the rhythm patterns, frequencies, and other information.
 
-## Algorithmic Techniques
+## Techniques and Strategies
+
+### Chord Strategies
+
+The system uses various chord strategies within the key of C Major. These strategies are determined by a Markov Chain, which transitions between different chord types based on predefined probabilities.
+
+- **Tonic**: C major 7
+- **Dominant**: G major 7
+- **Subdominant**: F major 7
+- **Minor**: D minor 7
+- **Diminished**: B diminished 7
+- **Suspended**: C suspended
+- **Minor7**: D minor 7
+- **Augmented**: C augmented
+
+### Melody Strategies
+
+The melody is generated using different strategies, also determined by a Markov Chain. Each strategy produces a unique melodic pattern.
+
+- **Stepwise**: Generates a melody that moves in small steps.
+- **Leap**: Generates a melody with larger intervals.
+- **Motif**: Repeats a short melodic motif.
+- **Arpeggio**: Uses arpeggios to create the melody.
+- **Pentatonic**: Uses the pentatonic scale.
+- **Blues**: Uses the blues scale.
+- **Chord Tones**: Prioritizes chord tones in the melody.
+- **Ascending Run**: Creates an ascending melodic run.
+- **Descending Run**: Creates a descending melodic run.
+- **Random Walk**: Generates a random walk through the scale.
+
+### Rhythm Patterns
+
+The rhythm of the melody is determined by predefined patterns, which are randomly selected for each iteration.
+
+- **Pattern 1**: [1, 0.5, 0.5, 1, 0.5, 0.5, 1]
+- **Pattern 2**: [1, 1, 0.5, 0.5, 1, 1, 1]
+- **Pattern 3**: [0.5, 0.5, 0.5, 0.5, 1, 1]
+- **Pattern 4**: [1, 0.25, 0.25, 1, 0.5, 0.5, 1]
+- **Pattern 5**: [0.25, 0.25, 0.5, 0.5, 1, 1, 1]
+- **Pattern 6**: [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5] (Triplets)
+
+## Computer Science Techniques
 
 ### Markov Chains
 
-Markov chains are utilized to introduce variability and probabilistic transitions in the composition. Instead of a fixed sequence, the system can transition between different musical strategies based on predefined probabilities, ensuring that the music evolves organically over time.
+Markov Chains are used to determine the next chord and melody strategies. A Markov Chain is a stochastic model that describes a sequence of possible events where the probability of each event depends only on the state attained in the previous event. In this project, Markov Chains are used to transition between different chord and melody strategies based on predefined probabilities.
 
-- **Chord Strategy Markov Matrix:**
-  - Dictates the probability of transitioning from one chord strategy (e.g., tonic) to another (e.g., dominant).
-  
-- **Melody Strategy Markov Matrix:**
-  - Controls the likelihood of switching between different melodic strategies (e.g., stepwise, leap).
+### Event Scheduling
 
-### Generative Functions
+The composition uses an event scheduling system to manage the timing of notes. The `scheduler` function ensures that notes are played at the correct time by scheduling events ahead of time and using a lookahead interval to keep the timing accurate.
 
-Generative functions are employed to create chords and melodies dynamically. These functions encapsulate specific musical techniques, ensuring that each generated element adheres to musical coherence and theory.
+### Audio Synthesis
 
-- **Chord Generators:**
-  - Functions that return specific chord structures based on harmonic functions (e.g., tonic, dominant).
-  
-- **Melody Generators:**
-  - Functions that produce melody notes using various strategies like stepwise motion, leaps, motifs, and arpeggios.
+The project uses the Web Audio API to generate and manipulate sound. Oscillators are created for each note, and various audio nodes (e.g., gain nodes, filters, panners) are used to shape the sound. The `createOrganOscillator` function is responsible for creating a rich organ sound by layering oscillators and applying filters and effects.
 
-## Musical Theories Implemented
+### User Interaction
 
-### Harmonic Functions
+Event listeners are used to handle user interactions with the controls. For example, sliders and buttons are used to adjust the tempo, volume, and other parameters. The `addEventListener` method is used to attach event handlers to the DOM elements.
 
-The composition incorporates fundamental harmonic functions to establish tonal centers and progression:
+## Music Theory Techniques
 
-- **Tonic (`tonic`):** The home chord that provides a sense of resolution.
-- **Dominant (`dominant`):** Creates tension that resolves back to the tonic.
-- **Subdominant (`subdominant`):** Acts as a bridge between tonic and dominant.
-- **Minor (`minor`):** Introduces a minor tonality for emotional depth.
-- **Diminished (`diminished`):** Adds dissonance and tension, enhancing the harmonic complexity.
+### Chord Progressions
 
-Each harmonic function is associated with specific chord structures, contributing to the overall musical narrative.
+The project uses various chord progressions within the key of C Major. Chord progressions are sequences of chords that are used to create harmony in music. The system transitions between different chord types (e.g., tonic, dominant, subdominant) based on the probabilities defined in the Markov Chain.
 
-### Melodic Strategies
+### Melody Generation
 
-To ensure melodic interest and variation, multiple strategies are employed:
+Melodies are generated using different strategies that define how the notes are selected and arranged. For example, the stepwise strategy generates melodies that move in small steps, while the leap strategy generates melodies with larger intervals. The melody strategies are designed to create interesting and varied melodic patterns.
 
-- **Stepwise Motion (`stepwise`):**
-  - Melodies move predominantly by adjacent scale degrees, creating smooth and coherent lines.
-  
-- **Leap Motion (`leap`):**
-  - Introduces larger intervals between notes, adding variety and excitement.
-  
-- **Motif (`motif`):**
-  - Repeats short sequences of notes, establishing recognizable patterns within the melody.
-  
-- **Arpeggio (`arpeggio`):**
-  - Plays the notes of a chord in succession, aligning the melody closely with the harmony.
+### Scales
 
-These strategies are dynamically selected and combined using Markov chains to produce evolving and engaging melodies.
+The project uses different scales to generate melodies. For example, the pentatonic scale and the blues scale are used in some of the melody strategies. Scales are sequences of notes that are used as the basis for melodies and harmonies in music.
 
-## Scheduler and Timing
+### Rhythm Patterns
 
-A robust scheduling system ensures that musical events (chords and melodies) are played seamlessly without overlaps or gaps:
+Rhythm patterns define the timing and duration of notes in the melody. The project uses predefined rhythm patterns that are randomly selected for each iteration. Rhythm patterns add variety and interest to the composition by varying the timing and duration of notes.
 
-- **Scheduler Function:**
-  - Continuously checks if new events need to be scheduled ahead of the current playback time.
-  
-- **Scheduling Parameters:**
-  - **Lookahead:** Determines how frequently the scheduler runs (e.g., every 25ms).
-  - **Schedule Ahead Time:** Specifies how far into the future events are scheduled (e.g., 0.1 seconds).
-  
-- **Beat Alignment:**
-  - Both chords and melodies are scheduled based on beats per minute (BPM), ensuring synchronized playback.
+## Conclusion
 
-## Oscillator Management
-
-Effective management of oscillators is crucial for sound synthesis and preventing memory leaks:
-
-- **Organ Oscillators:**
-  - Each chord is synthesized using three oscillators representing the fundamental frequency and its harmonics.
-  
-- **Gain Nodes:**
-  - Control the amplitude envelope (ADSR) for smooth note transitions.
-  
-- **Oscillator Lifecycle:**
-  - Oscillators are started and stopped precisely based on the scheduled timing, ensuring clean and continuous playback.
-
-## Logging and Console Features
-
-An on-screen console provides real-time insights into the composition process:
-
-- **Strategy Information:**
-  - Logs the current chord and melody strategies being employed.
-  
-- **Rhythm Patterns:**
-  - Displays the rhythm patterns used for each melody segment.
-  
-- **Event Logging:**
-  - Records detailed information about each chord and melody note, including frequencies and timing.
-  
-- **Chord Limitation:**
-  - Implements a counter to limit the number of consecutive chords, preventing excessive repetition and enhancing musical variation.
-
-## Limitations and Future Enhancements
-
-While the current implementation provides a dynamic and evolving composition, there are areas for further improvement:
-
-- **Voice Leading Enhancements:**
-  - Implement smoother transitions between chords by minimizing large leaps in individual voice parts.
-  
-- **Counterpoint and Polyphony:**
-  - Introduce multiple melody lines interacting harmoniously, adding depth and complexity.
-  
-- **Ornamentation:**
-  - Add grace notes, trills, and other embellishments to enrich the melody.
-  
-- **Dynamic Expression:**
-  - Incorporate volume modulation (crescendo/decrescendo) and subtle tempo variations for expressiveness.
-  
-- **Effects and Reverb:**
-  - Utilize `ConvolverNode` to simulate acoustic environments, enhancing the organ's richness.
-  
-- **Expanded Chord and Melody Libraries:**
-  - Include additional chords (e.g., secondary dominants) and advanced melodic techniques for greater variety.
-  
-- **Rhythmic Variation:**
-  - Implement polyrhythms and more complex rhythm patterns to further diversify the composition.
-
-## Getting Started
-
-### Prerequisites
-
-- A modern web browser (e.g., Chrome, Firefox) that supports the Web Audio API.
-
-### Installation
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone https://github.com/yourusername/infinite-organ-composition.git```
+This project demonstrates the use of Markov Chains and the Web Audio API to create an advanced organ composition system. By combining computer science techniques with music theory, the system generates dynamic and evolving musical pieces that can be controlled and manipulated by the user. Explore the live demo to experience the full capabilities of the system.

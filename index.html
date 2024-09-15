@@ -137,20 +137,35 @@
       consoleDiv.innerHTML = "";
     }
 
+    // Extended Chord Strategies
     const chordStrategies = {
-      tonic: () => [261.63, 329.63, 392.00, 523.25],
-      dominant: () => [392.00, 493.88, 587.33, 784.00],
-      subdominant: () => [349.23, 440.00, 523.25, 698.46],
-      minor: () => [293.66, 369.99, 440.00, 587.33],
-      diminished: () => [493.88, 622.25, 739.99, 987.77]
+      tonic: () => [261.63, 329.63, 392.00, 523.25], // C major 7
+      dominant: () => [392.00, 493.88, 587.33, 784.00], // G major 7
+      subdominant: () => [349.23, 440.00, 523.25, 698.46], // F major 7
+      minor: () => [293.66, 369.99, 440.00, 587.33], // D minor 7
+      diminished: () => [493.88, 622.25, 739.99, 987.77], // B diminished 7
+      suspended: () => [261.63, 349.23, 392.00, 523.25], // C suspended
+      minor7: () => [293.66, 349.23, 440.00, 523.25], // D minor 7
+      augmented: () => [261.63, 329.63, 415.30, 523.25] // C augmented
     };
 
+    // New Melody Strategies
     const melodyStrategies = {
       stepwise: generateStepwiseMelody,
       leap: generateLeapingMelody,
       motif: generateMotifMelody,
-      arpeggio: generateArpeggioMelody
+      arpeggio: generateArpeggioMelody,
+      pentatonic: generatePentatonicMelody,
+      blues: generateBluesMelody,
+      chordTones: generateChordTonesMelody,
+      ascendingRun: generateAscendingRun,
+      descendingRun: generateDescendingRun,
+      randomWalk: generateRandomWalk
     };
+
+    // Pentatonic and Blues Scales
+    const pentatonicScale = [261.63, 293.66, 329.63, 392.00, 440.00];
+    const bluesScale = [261.63, 293.66, 311.13, 329.63, 392.00, 466.16, 523.25];
 
     const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.26, 698.46, 784.00, 880.00, 987.77, 1046.50];
 
@@ -176,6 +191,39 @@
       return chord[currentMelodyIndex++ % chord.length];
     }
 
+    function generatePentatonicMelody() {
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      currentMelodyIndex = Math.max(0, Math.min(pentatonicScale.length - 1, currentMelodyIndex + direction));
+      return pentatonicScale[currentMelodyIndex];
+    }
+
+    function generateBluesMelody() {
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      currentMelodyIndex = Math.max(0, Math.min(bluesScale.length - 1, currentMelodyIndex + direction));
+      return bluesScale[currentMelodyIndex];
+    }
+
+    function generateChordTonesMelody() {
+      const chord = chordStrategies[currentChordStrategy]();
+      return chord[Math.floor(Math.random() * chord.length)];
+    }
+
+    function generateAscendingRun() {
+      currentMelodyIndex = Math.min(scale.length - 1, currentMelodyIndex + 1);
+      return scale[currentMelodyIndex];
+    }
+
+    function generateDescendingRun() {
+      currentMelodyIndex = Math.max(0, currentMelodyIndex - 1);
+      return scale[currentMelodyIndex];
+    }
+
+    function generateRandomWalk() {
+      const step = Math.floor(Math.random() * 3) - 1;
+      currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + step));
+      return scale[currentMelodyIndex];
+    }
+
     function getNextStrategy(currentStrategy, markovMatrix) {
       const transitions = markovMatrix[currentStrategy];
       const strategies = Object.keys(transitions);
@@ -193,18 +241,27 @@
     }
 
     const chordStrategyMarkovMatrix = {
-      tonic: { tonic: 0.5, dominant: 0.3, subdominant: 0.1, minor: 0.05, diminished: 0.05 },
-      dominant: { tonic: 0.4, dominant: 0.4, subdominant: 0.1, minor: 0.05, diminished: 0.05 },
-      subdominant: { tonic: 0.3, dominant: 0.3, subdominant: 0.3, minor: 0.05, diminished: 0.05 },
-      minor: { tonic: 0.3, dominant: 0.2, subdominant: 0.2, minor: 0.2, diminished: 0.1 },
-      diminished: { tonic: 0.4, dominant: 0.2, subdominant: 0.1, minor: 0.1, diminished: 0.2 }
+      tonic: { tonic: 0.4, dominant: 0.3, subdominant: 0.1, minor: 0.05, diminished: 0.05, suspended: 0.05, minor7: 0.03, augmented: 0.02 },
+      dominant: { tonic: 0.3, dominant: 0.4, subdominant: 0.1, minor: 0.05, diminished: 0.05, suspended: 0.03, minor7: 0.05, augmented: 0.02 },
+      subdominant: { tonic: 0.3, dominant: 0.3, subdominant: 0.3, minor: 0.05, diminished: 0.05, suspended: 0.02 },
+      minor: { tonic: 0.3, dominant: 0.2, subdominant: 0.2, minor: 0.2, diminished: 0.1, minor7: 0.05 },
+      diminished: { tonic: 0.3, dominant: 0.2, subdominant: 0.1, minor: 0.1, diminished: 0.2 },
+      suspended: { tonic: 0.4, dominant: 0.3, minor: 0.1, suspended: 0.2 },
+      minor7: { tonic: 0.2, minor7: 0.5, minor: 0.3 },
+      augmented: { tonic: 0.4, dominant: 0.3, augmented: 0.3 }
     };
 
     const melodyStrategyMarkovMatrix = {
-      stepwise: { stepwise: 0.6, leap: 0.2, motif: 0.1, arpeggio: 0.1 },
-      leap: { stepwise: 0.3, leap: 0.5, motif: 0.1, arpeggio: 0.1 },
-      motif: { stepwise: 0.2, leap: 0.2, motif: 0.5, arpeggio: 0.1 },
-      arpeggio: { stepwise: 0.2, leap: 0.2, motif: 0.1, arpeggio: 0.5 }
+      stepwise: { stepwise: 0.3, leap: 0.2, motif: 0.1, arpeggio: 0.1, pentatonic: 0.1, chordTones: 0.05, blues: 0.05, randomWalk: 0.05 },
+      leap: { stepwise: 0.2, leap: 0.5, motif: 0.1, arpeggio: 0.1, ascendingRun: 0.05, descendingRun: 0.05 },
+      motif: { stepwise: 0.2, leap: 0.2, motif: 0.3, arpeggio: 0.1, pentatonic: 0.1 },
+      arpeggio: { stepwise: 0.2, leap: 0.1, motif: 0.1, arpeggio: 0.4, pentatonic: 0.1 },
+      pentatonic: { pentatonic: 0.6, chordTones: 0.2, stepwise: 0.1, blues: 0.1 },
+      blues: { blues: 0.6, stepwise: 0.1, chordTones: 0.1, motif: 0.1, arpeggio: 0.1 },
+      chordTones: { chordTones: 0.5, arpeggio: 0.2, stepwise: 0.1, randomWalk: 0.2 },
+      ascendingRun: { ascendingRun: 0.5, descendingRun: 0.2, stepwise: 0.1, motif: 0.1 },
+      descendingRun: { descendingRun: 0.5, ascendingRun: 0.2, stepwise: 0.1, motif: 0.1 },
+      randomWalk: { randomWalk: 0.6, stepwise: 0.2, leap: 0.1, motif: 0.1 }
     };
 
     // Function to create a rich organ sound with careful layering
@@ -319,12 +376,16 @@
       document.getElementById('stopButton').disabled = true;
     });
 
+    // Extended Rhythm Patterns
     const rhythmPatterns = [
       [1, 0.5, 0.5, 1, 0.5, 0.5, 1],
       [1, 1, 0.5, 0.5, 1, 1, 1],
       [0.5, 0.5, 0.5, 0.5, 1, 1],
       [1, 0.25, 0.25, 1, 0.5, 0.5, 1],
-      [0.25, 0.25, 0.5, 0.5, 1, 1, 1]
+      [0.25, 0.25, 0.5, 0.5, 1, 1, 1],
+      [1, 1, 1.5, 0.5, 0.5], // Polyrhythmic pattern
+      [0.75, 0.25, 1, 0.75, 0.25, 0.5], // Dotted rhythms
+      [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5] // Triplets
     ];
   </script>
 </body>

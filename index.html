@@ -215,6 +215,11 @@
     <button id="playButton">Play</button>
     <button id="stopButton" disabled>Stop</button>
   </div>
+
+  <!-- Visual Feedback -->
+  <div class="visual-feedback">
+  <canvas id="visualizationCanvas" width="800" height="200"></canvas>
+</div>
   
   <!-- Visual Feedback -->
   <div class="visual-feedback">
@@ -735,12 +740,87 @@
     ];
 
 
-    // Start the audio context on user interaction to comply with browser policies
-    document.body.addEventListener('click', () => {
-      if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
+  // Start the audio context on user interaction to comply with browser policies
+  document.body.addEventListener('click', () => {
+    if (!audioContext) {
+      initializeAudio();
+    } else if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }, { once: true });
+
+  const canvas = document.getElementById('visualizationCanvas');
+  const canvasContext = canvas.getContext('2d');
+  let analyser;
+
+  function drawVisualization() {
+    if (!analyser) return;
+    requestAnimationFrame(drawVisualization);
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+
+    canvasContext.fillStyle = 'rgb(17, 17, 17)';
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvasContext.lineWidth = 2;
+    canvasContext.strokeStyle = 'rgb(0, 255, 0)';
+    canvasContext.beginPath();
+
+    const sliceWidth = canvas.width * 1.0 / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = v * canvas.height / 2;
+
+      if (i === 0) {
+        canvasContext.moveTo(x, y);
+      } else {
+        canvasContext.lineTo(x, y);
       }
-    }, { once: true });
+
+      x += sliceWidth;
+    }
+
+    canvasContext.lineTo(canvas.width, canvas.height / 2);
+    canvasContext.stroke();
+  }
+
+  function initializeAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Create master gain node
+      masterGain = audioContext.createGain();
+      masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+
+      // Create and connect reverb
+      reverbNode = createReverb(audioContext);
+      reverbNode.connect(masterGain);
+      masterGain.connect(audioContext.destination);
+
+      // Create analyser node
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048; // Set FFT size for better resolution
+      masterGain.connect(analyser);
+
+      logToConsole('AudioContext initialized with reverb and analyser.', 'info');
+    } else if (audioContext.state === 'suspended') {
+      audioContext.resume().then(() => {
+        logToConsole('AudioContext resumed after user interaction.', 'info');
+      });
+    }
+  }
+
+  // Ensure drawVisualization is called continuously
+  function startVisualization() {
+    if (!analyser) return;
+    drawVisualization();
+  }
+
+  // Start visualization when audio context is initialized
+  document.body.addEventListener('click', startVisualization, { once: true });
 
   </script>
 </body>

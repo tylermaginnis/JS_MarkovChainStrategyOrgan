@@ -275,6 +275,35 @@
       <input type="checkbox" id="darkModeToggle">
     </div>
   </div>
+
+  <div class="controls">
+
+    <!-- EQ Controls -->
+    <div class="control-group">
+      <label for="eq60">60 Hz</label>
+      <input type="range" id="eq60" min="-12" max="12" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <label for="eq170">170 Hz</label>
+      <input type="range" id="eq170" min="-12" max="12" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <label for="eq350">350 Hz</label>
+      <input type="range" id="eq350" min="-12" max="12" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <label for="eq1000">1 kHz</label>
+      <input type="range" id="eq1000" min="-12" max="12" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <label for="eq3500">3.5 kHz</label>
+      <input type="range" id="eq3500" min="-12" max="12" step="0.1" value="0">
+    </div>
+    <div class="control-group">
+      <label for="eq10000">10 kHz</label>
+      <input type="range" id="eq10000" min="-12" max="12" step="0.1" value="0">
+    </div>
+  </div>
   
   <!-- Play and Stop Buttons -->
   <div class="buttons">
@@ -317,6 +346,7 @@
     let reverbNode;
     let isChordsMuted = false;
     let isMelodyMuted = false;
+    let eqNodes = []; // Add this line for EQ nodes
 
     // Tempo and Volume Controls
     let tempo = 90;
@@ -353,6 +383,16 @@
     const currentMelodyDiv = document.getElementById('currentMelody');
     const chordStrategySpan = document.getElementById('chordStrategy');
     const melodyStrategySpan = document.getElementById('melodyStrategy');
+
+    // EQ Sliders
+    const eq60Slider = document.getElementById('eq60');
+    const eq170Slider = document.getElementById('eq170');
+    const eq350Slider = document.getElementById('eq350');
+    const eq1000Slider = document.getElementById('eq1000');
+    const eq3500Slider = document.getElementById('eq3500');
+    const eq10000Slider = document.getElementById('eq10000');
+
+
 
     // Logging Functions
     function logToConsole(message, type = 'info') {
@@ -705,26 +745,55 @@
       melodyStrategySpan.textContent = '--';
     }
 
-    function initializeAudio() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      // Function to initialize audio context and nodes
+  function initializeAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Create master gain node
-        masterGain = audioContext.createGain();
-        masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+      // Create master gain node
+      masterGain = audioContext.createGain();
+      masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
 
-        // Create and connect reverb
-        reverbNode = createReverb(audioContext);
-        reverbNode.connect(masterGain);
-        masterGain.connect(audioContext.destination);
+      // Create and connect reverb
+      reverbNode = createReverb(audioContext);
+      reverbNode.connect(masterGain);
 
-        logToConsole('AudioContext initialized with reverb.', 'info');
-      } else if (audioContext.state === 'suspended') {
-        audioContext.resume().then(() => {
-          logToConsole('AudioContext resumed after user interaction.', 'info');
-        });
-      }
+      // Create EQ nodes and connect them in series
+      eqNodes = createEQ(audioContext);
+      eqNodes.reduce((prev, curr) => {
+        prev.connect(curr);
+        return curr;
+      }, reverbNode).connect(masterGain);
+
+      masterGain.connect(audioContext.destination);
+
+      // Create analyser node
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048; // Set FFT size for better resolution
+      masterGain.connect(analyser);
+
+      // Adjust canvas size dynamically
+      const canvas = document.getElementById('visualizationCanvas');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.width / 4; // Maintain aspect ratio
+
+      // Clear the canvas to prevent it from going black
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Start visualization immediately after initialization
+      const lightModeElement = document.getElementById('lightMode');
+      let lightMode = lightModeElement ? lightModeElement.checked : false;
+      updateVisualizerColors(lightMode);
+      startVisualization();
+
+      logToConsole('AudioContext initialized with reverb, EQ, and analyser.', 'info');
+    } else if (audioContext.state === 'suspended') {
+      audioContext.resume().then(() => {
+        logToConsole('AudioContext resumed after user interaction.', 'info');
+      });
     }
+  }
+
 
     // Event Listeners for Controls
     tempoSlider.addEventListener('input', () => {
@@ -861,46 +930,67 @@
     canvasContext.lineTo(canvas.width, canvas.height / 2);
     canvasContext.stroke();
   }
-
-  function initializeAudio() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-    // Create master gain node
-    masterGain = audioContext.createGain();
-    masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
-
-    // Create and connect reverb
-    reverbNode = createReverb(audioContext);
-    reverbNode.connect(masterGain);
-    masterGain.connect(audioContext.destination);
-
-    // Create analyser node
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048; // Set FFT size for better resolution
-    masterGain.connect(analyser);
-
-    // Adjust canvas size dynamically
-    const canvas = document.getElementById('visualizationCanvas');
-    canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = canvas.width / 4; // Maintain aspect ratio
-
-    // Clear the canvas to prevent it from going black
-    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Start visualization immediately after initialization
-    const lightModeElement = document.getElementById('lightMode');
-    let lightMode = lightModeElement ? lightModeElement.checked : false;
-    updateVisualizerColors(lightMode);
-    startVisualization();
-
-    logToConsole('AudioContext initialized with reverb and analyser.', 'info');
-  } else if (audioContext.state === 'suspended') {
-    audioContext.resume().then(() => {
-      logToConsole('AudioContext resumed after user interaction.', 'info');
+  // Function to create EQ nodes
+  function createEQ(audioContext) {
+    const frequencies = [60, 170, 350, 1000, 3500, 10000];
+    return frequencies.map(freq => {
+      const eq = audioContext.createBiquadFilter();
+      eq.type = 'peaking';
+      eq.frequency.value = freq;
+      eq.Q.value = 1;
+      eq.gain.value = 0; // Default gain
+      return eq;
     });
   }
-}
+
+  // Function to initialize audio context and nodes
+  function initializeAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Create master gain node
+      masterGain = audioContext.createGain();
+      masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+
+      // Create and connect reverb
+      reverbNode = createReverb(audioContext);
+      reverbNode.connect(masterGain);
+
+      // Create EQ nodes and connect them in series
+      eqNodes = createEQ(audioContext);
+      eqNodes.reduce((prev, curr) => {
+        prev.connect(curr);
+        return curr;
+      }, reverbNode).connect(masterGain);
+
+      masterGain.connect(audioContext.destination);
+
+      // Create analyser node
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048; // Set FFT size for better resolution
+      masterGain.connect(analyser);
+
+      // Adjust canvas size dynamically
+      const canvas = document.getElementById('visualizationCanvas');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.width / 4; // Maintain aspect ratio
+
+      // Clear the canvas to prevent it from going black
+      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Start visualization immediately after initialization
+      const lightModeElement = document.getElementById('lightMode');
+      let lightMode = lightModeElement ? lightModeElement.checked : false;
+      updateVisualizerColors(lightMode);
+      startVisualization();
+
+      logToConsole('AudioContext initialized with reverb, EQ, and analyser.', 'info');
+    } else if (audioContext.state === 'suspended') {
+      audioContext.resume().then(() => {
+        logToConsole('AudioContext resumed after user interaction.', 'info');
+      });
+    }
+  }
 
 
   // Ensure drawVisualization is called continuously
@@ -932,7 +1022,8 @@ darkModeToggle.addEventListener('change', () => {
 });
 
 // Function to update visualizer colors based on mode
-function updateVisualizerColors(darkMode) {
+  // Function to update visualizer colors based on mode
+  function updateVisualizerColors(darkMode) {
     if (darkMode) {
       canvasContext.fillStyle = 'rgb(17, 17, 17)'; // Dark background
       canvasContext.strokeStyle = 'rgb(0, 255, 0)'; // Green lines
@@ -950,7 +1041,7 @@ function updateVisualizerColors(darkMode) {
     const dataArray = new Uint8Array(bufferLength);
     analyser.getByteTimeDomainData(dataArray);
 
-    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 
     canvasContext.lineWidth = 2;
     canvasContext.beginPath();
@@ -975,8 +1066,40 @@ function updateVisualizerColors(darkMode) {
     canvasContext.stroke();
   }
 
-// Start visualization when audio context is initialized
-document.body.addEventListener('click', startVisualization, { once: true });
+  // Start visualization when audio context is initialized
+  document.body.addEventListener('click', startVisualization, { once: true });
+
+  // Event Listeners for EQ Controls
+  eq60Slider.addEventListener('input', () => {
+    eqNodes[0].gain.value = parseFloat(eq60Slider.value);
+    logToConsole(`60 Hz EQ set to ${eq60Slider.value} dB`, 'info');
+  });
+
+  eq170Slider.addEventListener('input', () => {
+    eqNodes[1].gain.value = parseFloat(eq170Slider.value);
+    logToConsole(`170 Hz EQ set to ${eq170Slider.value} dB`, 'info');
+  });
+
+  eq350Slider.addEventListener('input', () => {
+    eqNodes[2].gain.value = parseFloat(eq350Slider.value);
+    logToConsole(`350 Hz EQ set to ${eq350Slider.value} dB`, 'info');
+  });
+
+  eq1000Slider.addEventListener('input', () => {
+    eqNodes[3].gain.value = parseFloat(eq1000Slider.value);
+    logToConsole(`1 kHz EQ set to ${eq1000Slider.value} dB`, 'info');
+  });
+
+  eq3500Slider.addEventListener('input', () => {
+    eqNodes[4].gain.value = parseFloat(eq3500Slider.value);
+    logToConsole(`3.5 kHz EQ set to ${eq3500Slider.value} dB`, 'info');
+  });
+
+  eq10000Slider.addEventListener('input', () => {
+    eqNodes[5].gain.value = parseFloat(eq10000Slider.value);
+    logToConsole(`10 kHz EQ set to ${eq10000Slider.value} dB`, 'info');
+  });
+
 
   </script>
 </body>

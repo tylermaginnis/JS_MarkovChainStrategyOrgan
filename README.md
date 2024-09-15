@@ -85,24 +85,23 @@ The rhythm of the melody is determined by predefined patterns, which are randoml
 - **Pattern 4**: [1, 0.25, 0.25, 1, 0.5, 0.5, 1]
 - **Pattern 5**: [0.25, 0.25, 0.5, 0.5, 1, 1, 1]
 - **Pattern 6**: [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5] (Triplets)
-
 ## Computer Science Techniques
 
 ### Markov Chains
 
-Markov Chains are used to determine the next chord and melody strategies. A Markov Chain is a stochastic model that describes a sequence of possible events where the probability of each event depends only on the state attained in the previous event. In this project, Markov Chains are used to transition between different chord and melody strategies based on predefined probabilities.
+Markov Chains are pivotal in determining the subsequent chord and melody strategies. Essentially, a Markov Chain is a stochastic model that represents a sequence of possible events, where the likelihood of each event is contingent solely on the state achieved in the preceding event. In this project, Markov Chains facilitate the transition between various chord and melody strategies, guided by predefined probabilities. This ensures a coherent and musically pleasing progression.
 
 ### Event Scheduling
 
-The composition uses an event scheduling system to manage the timing of notes. The `scheduler` function ensures that notes are played at the correct time by scheduling events ahead of time and using a lookahead interval to keep the timing accurate.
+To manage the precise timing of notes, the composition employs an event scheduling system. The `scheduler` function is integral to this system, ensuring that notes are played at the correct intervals. It achieves this by scheduling events in advance and utilizing a lookahead interval to maintain accurate timing. This method is crucial for synchronizing the different elements of the composition.
 
 ### Audio Synthesis
 
-The project uses the Web Audio API to generate and manipulate sound. Oscillators are created for each note, and various audio nodes (e.g., gain nodes, filters, panners) are used to shape the sound. The `createOrganOscillator` function is responsible for creating a rich organ sound by layering oscillators and applying filters and effects.
+The project leverages the Web Audio API for sound generation and manipulation. For each note, oscillators are created, and a variety of audio nodes (such as gain nodes, filters, and panners) are employed to shape the sound. The `createOrganOscillator` function plays a key role in this process, crafting a rich organ sound by layering multiple oscillators and applying various filters and effects. This results in a complex and textured audio output.
 
 ### User Interaction
 
-Event listeners are used to handle user interactions with the controls. For example, sliders and buttons are used to adjust the tempo, volume, and other parameters. The `addEventListener` method is used to attach event handlers to the DOM elements.
+User interaction is handled through event listeners, which respond to changes in the controls. For instance, sliders and buttons allow users to adjust parameters like tempo and volume. The `addEventListener` method is used to attach these event handlers to the corresponding DOM elements, enabling real-time interaction and customization of the composition. This interactive component enhances the user experience by providing intuitive control over the musical output.
 
 ## Music Theory Techniques
 

@@ -124,28 +124,34 @@
       border-radius: 4px;
     }
     .visual-feedback {
-      width: 90%;
-      margin: 20px auto;
-      padding: 10px;
-      background-color: #111111;
-      color: #00ff00;
-      border: 1px solid #00ff00;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 16px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap; /* Add this line to allow wrapping */
-    }
+    width: 90%;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #111111;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column; /* Change to column for vertical alignment */
+    align-items: center; /* Center align items */
+  }
     #visualizationCanvas {
       width: 100%; /* Make canvas responsive */
       height: auto; /* Maintain aspect ratio */
     }
 
-    .visual-section h3 {
-      margin-bottom: 10px;
-      color: #66ff66;
-    }
+    .visual-section {
+    margin-bottom: 20px; /* Add margin between sections */
+    width: 100%; /* Ensure sections take full width */
+    text-align: center; /* Center text within sections */
+  }
+
+  .visual-section h3 {
+    margin-bottom: 10px;
+    color: #66ff66;
+  }
     body.light-mode label { color: #3e9c3e; font-weight: bold; }
     body.light-mode .visual-section { color: #3e9c3e; font-weight:bold; }
     body.light-mode .visual-section h3 { color: #3e9c3e; font-weight:bold; }

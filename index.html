@@ -308,7 +308,6 @@
     // Function to create a rich organ sound with careful layering
     function createOrganOscillator(frequency, startTime, duration, isChord = false) {
       const osc1 = audioContext.createOscillator();
-      const osc2 = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
       // Create filters
@@ -320,31 +319,26 @@
       highPassFilter.type = 'highpass';
       highPassFilter.frequency.setValueAtTime(200, startTime); // Keep high pass frequency
 
-      // Use a sine wave and triangle wave for richness
-      osc1.type = 'sine';  
-      osc2.type = 'triangle'; // Slightly detuned for a richer sound
+      // Use a sine wave for simplicity and smoothness
+      osc1.type = isChord ? 'triangle' : 'sine';  
       osc1.frequency.setValueAtTime(frequency, startTime);
-      osc2.frequency.setValueAtTime(frequency * 1.005, startTime); // Small detuning
 
-      const targetGain = isChord ? 0.2 : 0.5; // Softer for chords
+      const targetGain = isChord ? 0.25 : 0.5; // Softer for chords
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.1); // Smoother attack
+      gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.1); // Smooth attack
       gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.1); // Sustain
-      gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Smoother release
+      gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Smooth release
 
-      // Connect nodes: Oscillators -> High-Pass -> Low-Pass -> Gain -> Destination
+      // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Destination
       osc1.connect(highPassFilter);
-      osc2.connect(highPassFilter);
       highPassFilter.connect(lowPassFilter);
       lowPassFilter.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
       osc1.start(startTime);
-      osc2.start(startTime);
       osc1.stop(startTime + duration);
-      osc2.stop(startTime + duration);
 
-      oscillators.push({ osc1, osc2, gainNode });
+      oscillators.push({ osc1, gainNode });
       logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
     }
 
@@ -406,9 +400,8 @@
       clearTimeout(schedulerId);
       logToConsole('Music playback stopped.', 'warn');
 
-      oscillators.forEach(({ osc1, osc2, gainNode }) => {
+      oscillators.forEach(({ osc1, gainNode }) => {
         osc1.stop();
-        osc2.stop();
         gainNode.disconnect();
       });
       oscillators = [];

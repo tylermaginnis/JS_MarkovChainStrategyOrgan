@@ -13,14 +13,43 @@
       padding: 0;
     }
     h1 {
-      font-size: 24px;
+      font-size: 28px;
       text-transform: uppercase;
       color: #00ff00;
       text-align: center;
-      margin-top: 20px;
+      margin: 20px 0;
       padding: 20px;
       border-bottom: 2px solid #00ff00;
       background-color: #111111;
+    }
+    .controls {
+      width: 90%;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #111111;
+      border: 1px solid #00ff00;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      border-radius: 8px;
+    }
+    .control-group {
+      margin: 10px;
+      flex: 1 1 200px;
+      min-width: 200px;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #00ff00;
+    }
+    .control-group input[type="range"],
+    .control-group select {
+      width: 100%;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
     }
     button {
       font-family: "Courier New", Courier, monospace;
@@ -28,23 +57,24 @@
       color: #00ff00;
       border: 1px solid #00ff00;
       padding: 10px 20px;
-      margin: 20px 10px;
+      margin: 10px;
       cursor: pointer;
       text-transform: uppercase;
       font-size: 16px;
       letter-spacing: 2px;
       transition: background-color 0.3s ease;
+      border-radius: 4px;
     }
     button:disabled {
       background-color: #333333;
       cursor: not-allowed;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #555555;
     }
     #console {
       width: 90%;
-      height: 400px;
+      height: 300px;
       margin: 20px auto;
       padding: 10px;
       background-color: #111111;
@@ -55,6 +85,7 @@
       font-size: 14px;
       white-space: pre-wrap;
       text-align: left;
+      border-radius: 8px;
     }
     #console div {
       margin-bottom: 5px;
@@ -72,41 +103,160 @@
       border: 1px solid #00ff00;
       padding: 5px;
       margin: 5px 0;
+      border-radius: 4px;
     }
     .chord {
-      color: #ff66ff; /* Magenta for chords */
+      color: #ff66ff;
     }
     .frequency {
-      color: #66ccff; /* Cyan for frequencies */
+      color: #66ccff;
     }
     .rhythm {
-      color: #ffff66; /* Yellow for rhythm */
+      color: #ffff66;
     }
     .melody-strategy {
-      color: #66ff66; /* Light green for melody strategy */
+      color: #66ff66;
     }
     .ascii-box {
       border: 1px solid #00ff00;
       padding: 5px;
       margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .visual-feedback {
+      width: 90%;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #111111;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .visual-section {
+      flex: 1;
+      text-align: center;
+    }
+    .visual-section h3 {
+      margin-bottom: 10px;
+      color: #66ff66;
     }
   </style>
 </head>
 <body>
   <h1>Advanced Organ Composition with Markov Chains</h1>
-  <div style="text-align: center;">
+  
+  <!-- Controls Panel -->
+  <div class="controls">
+    <!-- Tempo Control -->
+    <div class="control-group">
+      <label for="tempo">Tempo: <span id="tempoValue">90</span> BPM</label>
+      <input type="range" id="tempo" min="60" max="180" value="90">
+    </div>
+    
+    <!-- Master Volume Control -->
+    <div class="control-group">
+      <label for="masterVolume">Master Volume</label>
+      <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="0.7">
+    </div>
+    
+    <!-- Chord Volume Control -->
+    <div class="control-group">
+      <label for="chordVolume">Chord Volume</label>
+      <input type="range" id="chordVolume" min="0" max="1" step="0.01" value="0.2">
+    </div>
+    
+    <!-- Melody Volume Control -->
+    <div class="control-group">
+      <label for="melodyVolume">Melody Volume</label>
+      <input type="range" id="melodyVolume" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    
+    <!-- Reverb Control -->
+    <div class="control-group">
+      <label for="reverb">Reverb Intensity</label>
+      <input type="range" id="reverb" min="0" max="1" step="0.01" value="0.3">
+    </div>
+    
+    <!-- Chord Waveform Selection -->
+    <div class="control-group">
+      <label for="chordWaveform">Chord Waveform</label>
+      <select id="chordWaveform">
+        <option value="triangle">Triangle</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="square">Square</option>
+        <option value="sine" selected>Sine</option>
+      </select>
+    </div>
+    
+    <!-- Melody Waveform Selection -->
+    <div class="control-group">
+      <label for="melodyWaveform">Melody Waveform</label>
+      <select id="melodyWaveform">
+        <option value="sine" selected>Sine</option>
+        <option value="triangle">Triangle</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="square">Square</option>
+      </select>
+    </div>
+    
+    <!-- Mute Controls -->
+    <div class="control-group">
+      <button id="muteChords">Mute Chords</button>
+      <button id="muteMelody">Mute Melody</button>
+    </div>
+  </div>
+  
+  <!-- Play and Stop Buttons -->
+  <div class="buttons">
     <button id="playButton">Play</button>
     <button id="stopButton" disabled>Stop</button>
   </div>
+  
+  <!-- Visual Feedback -->
+  <div class="visual-feedback">
+    <div class="visual-section">
+      <h3>Current Chord</h3>
+      <div id="currentChord">--</div>
+    </div>
+    <div class="visual-section">
+      <h3>Current Melody</h3>
+      <div id="currentMelody">--</div>
+    </div>
+    <div class="visual-section">
+      <h3>Strategies</h3>
+      <div>Chord: <span id="chordStrategy">--</span></div>
+      <div>Melody: <span id="melodyStrategy">--</span></div>
+    </div>
+  </div>
+  
+  <!-- Console Logs -->
   <div id="console"></div>
-
+  
   <script>
+    // Initialize variables
     let audioContext;
     let isPlaying = false;
     let oscillators = [];
     let schedulerId;
-    const tempo = 90;
-    const secondsPerBeat = 60 / tempo;
+    let masterGain;
+    let reverbNode;
+    let isChordsMuted = false;
+    let isMelodyMuted = false;
+
+    // Tempo and Volume Controls
+    let tempo = 90;
+    let masterVolume = 0.7;
+    let chordVolume = 0.2;
+    let melodyVolume = 0.5;
+    let reverbIntensity = 0.3;
+    let chordWaveform = 'triangle';
+    let melodyWaveform = 'sine';
+
+    const secondsPerBeat = () => 60 / tempo;
     const lookahead = 25.0;
     const scheduleAheadTime = 0.1;
     let nextNoteTime = 0.0;
@@ -114,8 +264,26 @@
     let currentMelodyStrategy = 'stepwise';
     let currentMelodyIndex = 0;
 
+    // DOM Elements
     const consoleDiv = document.getElementById('console');
-    
+    const tempoSlider = document.getElementById('tempo');
+    const tempoValue = document.getElementById('tempoValue');
+    const masterVolumeSlider = document.getElementById('masterVolume');
+    const chordVolumeSlider = document.getElementById('chordVolume');
+    const melodyVolumeSlider = document.getElementById('melodyVolume');
+    const reverbSlider = document.getElementById('reverb');
+    const chordWaveformSelect = document.getElementById('chordWaveform');
+    const melodyWaveformSelect = document.getElementById('melodyWaveform');
+    const playButton = document.getElementById('playButton');
+    const stopButton = document.getElementById('stopButton');
+    const muteChordsButton = document.getElementById('muteChords');
+    const muteMelodyButton = document.getElementById('muteMelody');
+    const currentChordDiv = document.getElementById('currentChord');
+    const currentMelodyDiv = document.getElementById('currentMelody');
+    const chordStrategySpan = document.getElementById('chordStrategy');
+    const melodyStrategySpan = document.getElementById('melodyStrategy');
+
+    // Logging Functions
     function logToConsole(message, type = 'info') {
       const logMessage = document.createElement('div');
       logMessage.innerHTML = message;
@@ -153,7 +321,7 @@
       augmented: () => [261.63, 329.63, 415.30, 523.25] // C augmented
     };
 
-    // New Melody Strategies accepting currentChord
+    // Melody Strategies
     const melodyStrategies = {
       stepwise: generateStepwiseMelody,
       leap: generateLeapingMelody,
@@ -173,7 +341,7 @@
 
     const scale = majorScale; // Use majorScale based on key signature
 
-    // Updated Melody Generation Functions
+    // Melody Generation Functions
     function generateStepwiseMelody(currentChord) {
       const direction = Math.random() < 0.5 ? -1 : 1;
       currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + direction));
@@ -264,6 +432,7 @@
       }
     }
 
+    // Function to get the next strategy based on Markov matrix
     function getNextStrategy(currentStrategy, markovMatrix) {
       const transitions = markovMatrix[currentStrategy];
       const strategies = Object.keys(transitions);
@@ -280,7 +449,7 @@
       return currentStrategy;
     }
 
-    // Updated Chord Strategy Markov Matrix for Smoother Transitions
+    // Chord Strategy Markov Matrix
     const chordStrategyMarkovMatrix = {
       tonic: { tonic: 0.3, dominant: 0.4, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
       dominant: { tonic: 0.5, dominant: 0.2, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
@@ -292,6 +461,7 @@
       augmented: { tonic: 0.5, dominant: 0.3, subdominant: 0.15, minor: 0.025, diminished: 0.025, suspended: 0.0, minor7: 0.0, augmented: 0.0 }
     };
 
+    // Melody Strategy Markov Matrix
     const melodyStrategyMarkovMatrix = {
       stepwise: { stepwise: 0.3, leap: 0.2, motif: 0.1, arpeggio: 0.1, pentatonic: 0.1, chordTones: 0.05, blues: 0.05, randomWalk: 0.05 },
       leap: { stepwise: 0.2, leap: 0.5, motif: 0.1, arpeggio: 0.1, ascendingRun: 0.05, descendingRun: 0.05 },
@@ -305,10 +475,28 @@
       randomWalk: { randomWalk: 0.6, stepwise: 0.2, leap: 0.1, motif: 0.1 }
     };
 
+    // Function to create a reverb effect using a ConvolverNode
+    function createReverb(audioContext) {
+      const convolver = audioContext.createConvolver();
+      // Simple impulse response for reverb
+      const rate = audioContext.sampleRate;
+      const length = rate * 2; // 2 seconds
+      const impulse = audioContext.createBuffer(2, length, rate);
+      for (let channel = 0; channel < 2; channel++) {
+        const channelData = impulse.getChannelData(channel);
+        for (let i = 0; i < length; i++) {
+          channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+        }
+      }
+      convolver.buffer = impulse;
+      return convolver;
+    }
+
     // Function to create a rich organ sound with careful layering
-    function createOrganOscillator(frequency, startTime, duration, isChord = false) {
+    function createOrganOscillator(frequency, startTime, duration, isChord = false, chord = []) {
       const osc1 = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
+      const panner = audioContext.createStereoPanner();
 
       // Create filters
       const lowPassFilter = audioContext.createBiquadFilter();
@@ -319,42 +507,64 @@
       highPassFilter.type = 'highpass';
       highPassFilter.frequency.setValueAtTime(200, startTime); // Keep high pass frequency
 
-      // Use a sine wave for simplicity and smoothness
-      osc1.type = isChord ? 'triangle' : 'sine';  
+      // Set waveforms based on whether it's a chord or melody
+      osc1.type = isChord ? chordWaveform : melodyWaveform;
       osc1.frequency.setValueAtTime(frequency, startTime);
 
-      const targetGain = isChord ? 0.25 : 0.5; // Softer for chords
+      // Apply minimal detuning for chords to add richness
+      if (isChord && !isChordsMuted) {
+        osc1.detune.setValueAtTime(2, startTime); // Slight detuning
+      }
+
+      // Volume settings
+      const targetGain = isChord ? chordVolume : melodyVolume;
       gainNode.gain.setValueAtTime(0, startTime);
       gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.1); // Smooth attack
       gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.1); // Sustain
       gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Smooth release
 
-      // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Destination
+      // Stereo Panning
+      panner.pan.setValueAtTime(isChord ? 0 : 0.2, startTime); // Center chords, slightly right for melody
+
+      // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Panner -> Reverb -> Master Gain
       osc1.connect(highPassFilter);
       highPassFilter.connect(lowPassFilter);
       lowPassFilter.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(panner);
+      panner.connect(reverbNode);
+      reverbNode.connect(masterGain);
 
       osc1.start(startTime);
       osc1.stop(startTime + duration);
 
       oscillators.push({ osc1, gainNode });
       logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
+
+      // Update Visual Feedback
+      if (isChord) {
+        currentChordDiv.innerHTML = chord.map(freq => freq.toFixed(2) + 'Hz').join(', ');
+      } else {
+        currentMelodyDiv.innerHTML = frequency.toFixed(2) + 'Hz';
+      }
     }
 
     function playChord(chord, currentTime) {
       logBox(`=== Chord Strategy: <span class="chord">${currentChordStrategy.toUpperCase()}</span> ===`);
       chord.forEach(frequency => {
-        createOrganOscillator(frequency, currentTime, secondsPerBeat, true);
+        if (!isChordsMuted) {
+          createOrganOscillator(frequency, currentTime, secondsPerBeat(), true, chord);
+        }
       });
     }
 
     function playMelody(pattern, currentTime, currentChord) {
       logBox(`>>> Melody Strategy: <span class="melody-strategy">${currentMelodyStrategy.toUpperCase()}</span> <<<`);
       pattern.forEach((beatDuration, index) => {
-        const startTime = currentTime + index * beatDuration * secondsPerBeat;
+        const startTime = currentTime + index * beatDuration * secondsPerBeat();
         const frequency = melodyStrategies[currentMelodyStrategy](currentChord);
-        createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat, false);
+        if (!isMelodyMuted) {
+          createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat(), false);
+        }
       });
     }
 
@@ -367,11 +577,14 @@
     }
 
     function scheduleNextNote() {
-      nextNoteTime += secondsPerBeat;
+      nextNoteTime += secondsPerBeat();
     }
 
     function playMusic(currentTime) {
-      clearConsole(); // Clear the console when a new rhythm strategy starts
+      // Only clear console when a new chord strategy starts
+      if (currentTime !== nextNoteTime) {
+        clearConsole();
+      }
 
       const chord = chordStrategies[currentChordStrategy]();
       playChord(chord, currentTime);
@@ -379,6 +592,10 @@
       const rhythmPattern = rhythmPatterns[Math.floor(Math.random() * rhythmPatterns.length)];
       logToConsole(`Rhythm Pattern: <span class="rhythm">${rhythmPattern.join(', ')}</span>`, 'info');
       playMelody(rhythmPattern, currentTime, chord); // Pass the current chord here
+
+      // Update Strategy Indicators
+      chordStrategySpan.textContent = currentChordStrategy.toUpperCase();
+      melodyStrategySpan.textContent = currentMelodyStrategy.toUpperCase();
 
       currentChordStrategy = getNextStrategy(currentChordStrategy, chordStrategyMarkovMatrix);
       currentMelodyStrategy = getNextStrategy(currentMelodyStrategy, melodyStrategyMarkovMatrix);
@@ -401,35 +618,111 @@
       logToConsole('Music playback stopped.', 'warn');
 
       oscillators.forEach(({ osc1, gainNode }) => {
-        osc1.stop();
+        try {
+          osc1.stop();
+        } catch (e) {
+          // Oscillator already stopped
+        }
         gainNode.disconnect();
       });
       oscillators = [];
+      currentChordDiv.innerHTML = '--';
+      currentMelodyDiv.innerHTML = '--';
+      chordStrategySpan.textContent = '--';
+      melodyStrategySpan.textContent = '--';
     }
 
     function initializeAudio() {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        logToConsole('AudioContext initialized.', 'info');
+
+        // Create master gain node
+        masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+
+        // Create and connect reverb
+        reverbNode = createReverb(audioContext);
+        reverbNode.connect(masterGain);
+        masterGain.connect(audioContext.destination);
+
+        logToConsole('AudioContext initialized with reverb.', 'info');
       } else if (audioContext.state === 'suspended') {
-        audioContext.resume();
-        logToConsole('AudioContext resumed.', 'info');
+        audioContext.resume().then(() => {
+          logToConsole('AudioContext resumed after user interaction.', 'info');
+        });
       }
     }
 
-    document.getElementById('playButton').addEventListener('click', () => {
+    // Event Listeners for Controls
+    tempoSlider.addEventListener('input', () => {
+      tempo = parseInt(tempoSlider.value);
+      tempoValue.textContent = tempo;
+      logToConsole(`Tempo set to ${tempo} BPM`, 'info');
+    });
+
+    masterVolumeSlider.addEventListener('input', () => {
+      masterVolume = parseFloat(masterVolumeSlider.value);
+      masterGain.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+      logToConsole(`Master Volume set to ${masterVolume}`, 'info');
+    });
+
+    chordVolumeSlider.addEventListener('input', () => {
+      chordVolume = parseFloat(chordVolumeSlider.value);
+      logToConsole(`Chord Volume set to ${chordVolume}`, 'info');
+    });
+
+    melodyVolumeSlider.addEventListener('input', () => {
+      melodyVolume = parseFloat(melodyVolumeSlider.value);
+      logToConsole(`Melody Volume set to ${melodyVolume}`, 'info');
+    });
+
+    reverbSlider.addEventListener('input', () => {
+      reverbIntensity = parseFloat(reverbSlider.value);
+      reverbNode.normalize = false;
+      reverbNode.buffer.getChannelData(0).forEach((value, index, array) => {
+        array[index] = value * reverbIntensity;
+      });
+      reverbNode.buffer.getChannelData(1).forEach((value, index, array) => {
+        array[index] = value * reverbIntensity;
+      });
+      logToConsole(`Reverb Intensity set to ${reverbIntensity}`, 'info');
+    });
+
+    chordWaveformSelect.addEventListener('change', () => {
+      chordWaveform = chordWaveformSelect.value;
+      logToConsole(`Chord Waveform set to ${chordWaveform}`, 'info');
+    });
+
+    melodyWaveformSelect.addEventListener('change', () => {
+      melodyWaveform = melodyWaveformSelect.value;
+      logToConsole(`Melody Waveform set to ${melodyWaveform}`, 'info');
+    });
+
+    muteChordsButton.addEventListener('click', () => {
+      isChordsMuted = !isChordsMuted;
+      muteChordsButton.textContent = isChordsMuted ? 'Unmute Chords' : 'Mute Chords';
+      logToConsole(`Chords ${isChordsMuted ? 'Muted' : 'Unmuted'}`, 'warn');
+    });
+
+    muteMelodyButton.addEventListener('click', () => {
+      isMelodyMuted = !isMelodyMuted;
+      muteMelodyButton.textContent = isMelodyMuted ? 'Unmute Melody' : 'Mute Melody';
+      logToConsole(`Melody ${isMelodyMuted ? 'Muted' : 'Unmuted'}`, 'warn');
+    });
+
+    playButton.addEventListener('click', () => {
       startPlaying();
-      document.getElementById('playButton').disabled = true;
-      document.getElementById('stopButton').disabled = false;
+      playButton.disabled = true;
+      stopButton.disabled = false;
     });
 
-    document.getElementById('stopButton').addEventListener('click', () => {
+    stopButton.addEventListener('click', () => {
       stopPlaying();
-      document.getElementById('playButton').disabled = false;
-      document.getElementById('stopButton').disabled = true;
+      playButton.disabled = false;
+      stopButton.disabled = true;
     });
 
-    // Updated Rhythm Patterns
+    // Rhythm Patterns
     const rhythmPatterns = [
       [1, 0.5, 0.5, 1, 0.5, 0.5, 1],
       [1, 1, 0.5, 0.5, 1, 1, 1],
@@ -440,6 +733,15 @@
       [1, 0.5, 1, 0.5, 1, 0.5, 1], // Balanced pattern
       [1, 1, 0.75, 0.25, 1, 1] // Simplified dotted rhythms
     ];
+
+
+    // Start the audio context on user interaction to comply with browser policies
+    document.body.addEventListener('click', () => {
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }, { once: true });
+
   </script>
 </body>
 </html>

@@ -307,28 +307,41 @@
 
     // Function to create a rich organ sound with careful layering
     function createOrganOscillator(frequency, startTime, duration, isChord = false) {
-      const osc1 = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+  const osc1 = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
 
-      // Use a sine wave (for the smoothest organ-like sound)
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(frequency, startTime);
+  // Create filters
+  const lowPassFilter = audioContext.createBiquadFilter();
+  lowPassFilter.type = 'lowpass';
+  lowPassFilter.frequency.setValueAtTime(2000, startTime); // Set cutoff frequency for low pass
 
-      const targetGain = isChord ? 0.25 : 0.7; // Lowered gain for chords
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.05); // Smooth attack
-      gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.05); // Sustain
-      gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Release
+  const highPassFilter = audioContext.createBiquadFilter();
+  highPassFilter.type = 'highpass';
+  highPassFilter.frequency.setValueAtTime(200, startTime); // Set cutoff frequency for high pass
 
-      osc1.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+  // Use a sine wave (for the smoothest organ-like sound)
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(frequency, startTime);
 
-      osc1.start(startTime);
-      osc1.stop(startTime + duration);
+  const targetGain = isChord ? 0.25 : 0.7; // Lowered gain for chords
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(targetGain, startTime + 0.05); // Smooth attack
+  gainNode.gain.setValueAtTime(targetGain, startTime + duration - 0.05); // Sustain
+  gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Release
 
-      oscillators.push({ osc1, gainNode });
-      logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
-    }
+  // Connect nodes: Oscillator -> High-Pass -> Low-Pass -> Gain -> Destination
+  osc1.connect(highPassFilter);
+  highPassFilter.connect(lowPassFilter);
+  lowPassFilter.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  osc1.start(startTime);
+  osc1.stop(startTime + duration);
+
+  oscillators.push({ osc1, gainNode });
+  logToConsole(`Organ ${isChord ? "Chord" : "Melody"} played: <span class="frequency">${frequency.toFixed(2)}Hz</span>`, 'info');
+}
+
 
     function playChord(chord, currentTime) {
       logBox(`=== Chord Strategy: <span class="chord">${currentChordStrategy.toUpperCase()}</span> ===`);

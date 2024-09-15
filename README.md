@@ -27,11 +27,12 @@ This project demonstrates an advanced organ composition system using Markov Chai
 - **Visual Feedback**: Display the current chord, melody, and strategies being used.
 - **Console Logs**: View detailed logs of the composition process, including rhythm patterns and frequency information.
 - **Dark Mode**: Toggle between light and dark modes for better visual comfort.
+- **Equalizer**: Adjust the gain for different frequency bands (60 Hz, 170 Hz, 350 Hz, 1000 Hz, 3500 Hz, 10000 Hz).
 
 ## How to Use
 
 1. **Open the Live Demo**: Click on the [Live Demo](https://your-live-demo-link.com) link to open the application in your browser.
-2. **Adjust Controls**: Use the sliders and dropdowns to adjust the tempo, volume, reverb intensity, and waveforms.
+2. **Adjust Controls**: Use the sliders and dropdowns to adjust the tempo, volume, reverb intensity, waveforms, and equalizer settings.
    - **Tempo**: Move the slider to set the tempo (BPM).
    - **Master Volume**: Adjust the overall volume of the composition.
    - **Chord Volume**: Adjust the volume of the chords.
@@ -39,6 +40,7 @@ This project demonstrates an advanced organ composition system using Markov Chai
    - **Reverb Intensity**: Adjust the intensity of the reverb effect.
    - **Chord Waveform**: Select the waveform for the chords.
    - **Melody Waveform**: Select the waveform for the melody.
+   - **Equalizer**: Adjust the gain for different frequency bands using the EQ sliders.
 3. **Mute/Unmute**: Click the "Mute Chords" or "Mute Melody" buttons to mute or unmute the respective parts.
 4. **Play/Stop**: Click the "Play" button to start the composition. Click the "Stop" button to stop the composition.
 5. **Visual Feedback**: Observe the current chord, melody, and strategies in the visual feedback section.
@@ -85,6 +87,9 @@ The rhythm of the melody is determined by predefined patterns, which are randoml
 - **Pattern 4**: [1, 0.25, 0.25, 1, 0.5, 0.5, 1]
 - **Pattern 5**: [0.25, 0.25, 0.5, 0.5, 1, 1, 1]
 - **Pattern 6**: [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5] (Triplets)
+- **Pattern 7**: [1, 0.5, 1, 0.5, 1, 0.5, 1] (Balanced pattern)
+- **Pattern 8**: [1, 1, 0.75, 0.25, 1, 1] (Simplified dotted rhythms)
+
 ## Computer Science Techniques
 
 ### Markov Chains

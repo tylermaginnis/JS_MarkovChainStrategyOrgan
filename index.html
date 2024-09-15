@@ -137,7 +137,11 @@
       consoleDiv.innerHTML = "";
     }
 
-    // Extended Chord Strategies
+    // Define Key Signature
+    const keySignature = 'C';
+    const majorScale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.26, 698.46, 784.00, 880.00, 987.77, 1046.50];
+
+    // Extended Chord Strategies within Key of C Major
     const chordStrategies = {
       tonic: () => [261.63, 329.63, 392.00, 523.25], // C major 7
       dominant: () => [392.00, 493.88, 587.33, 784.00], // G major 7
@@ -149,7 +153,7 @@
       augmented: () => [261.63, 329.63, 415.30, 523.25] // C augmented
     };
 
-    // New Melody Strategies
+    // New Melody Strategies accepting currentChord
     const melodyStrategies = {
       stepwise: generateStepwiseMelody,
       leap: generateLeapingMelody,
@@ -167,61 +171,97 @@
     const pentatonicScale = [261.63, 293.66, 329.63, 392.00, 440.00];
     const bluesScale = [261.63, 293.66, 311.13, 329.63, 392.00, 466.16, 523.25];
 
-    const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.26, 698.46, 784.00, 880.00, 987.77, 1046.50];
+    const scale = majorScale; // Use majorScale based on key signature
 
-    function generateStepwiseMelody() {
+    // Updated Melody Generation Functions
+    function generateStepwiseMelody(currentChord) {
       const direction = Math.random() < 0.5 ? -1 : 1;
       currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + direction));
-      return scale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return scale[currentMelodyIndex];
+      }
     }
 
-    function generateLeapingMelody() {
+    function generateLeapingMelody(currentChord) {
       const leap = Math.random() < 0.5 ? 2 : 3;
       currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + (Math.random() < 0.5 ? -leap : leap)));
-      return scale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return scale[currentMelodyIndex];
+      }
     }
 
-    function generateMotifMelody() {
-      const motif = [261.63, 293.66, 329.63];
+    function generateMotifMelody(currentChord) {
+      const motif = currentChord.length > 0 ? currentChord : [261.63, 293.66, 329.63];
       return motif[currentMelodyIndex++ % motif.length];
     }
 
-    function generateArpeggioMelody() {
-      const chord = chordStrategies[currentChordStrategy]();
-      return chord[currentMelodyIndex++ % chord.length];
+    function generateArpeggioMelody(currentChord) {
+      if (currentChord.length === 0) return scale[currentMelodyIndex++ % scale.length];
+      return currentChord[currentMelodyIndex++ % currentChord.length];
     }
 
-    function generatePentatonicMelody() {
+    function generatePentatonicMelody(currentChord) {
       const direction = Math.random() < 0.5 ? -1 : 1;
       currentMelodyIndex = Math.max(0, Math.min(pentatonicScale.length - 1, currentMelodyIndex + direction));
-      return pentatonicScale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return pentatonicScale[currentMelodyIndex];
+      }
     }
 
-    function generateBluesMelody() {
+    function generateBluesMelody(currentChord) {
       const direction = Math.random() < 0.5 ? -1 : 1;
       currentMelodyIndex = Math.max(0, Math.min(bluesScale.length - 1, currentMelodyIndex + direction));
-      return bluesScale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return bluesScale[currentMelodyIndex];
+      }
     }
 
-    function generateChordTonesMelody() {
-      const chord = chordStrategies[currentChordStrategy]();
-      return chord[Math.floor(Math.random() * chord.length)];
+    function generateChordTonesMelody(currentChord) {
+      if (currentChord.length === 0) return scale[currentMelodyIndex++ % scale.length];
+      return currentChord[Math.floor(Math.random() * currentChord.length)];
     }
 
-    function generateAscendingRun() {
+    function generateAscendingRun(currentChord) {
       currentMelodyIndex = Math.min(scale.length - 1, currentMelodyIndex + 1);
-      return scale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return scale[currentMelodyIndex];
+      }
     }
 
-    function generateDescendingRun() {
+    function generateDescendingRun(currentChord) {
       currentMelodyIndex = Math.max(0, currentMelodyIndex - 1);
-      return scale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return scale[currentMelodyIndex];
+      }
     }
 
-    function generateRandomWalk() {
+    function generateRandomWalk(currentChord) {
       const step = Math.floor(Math.random() * 3) - 1;
       currentMelodyIndex = Math.max(0, Math.min(scale.length - 1, currentMelodyIndex + step));
-      return scale[currentMelodyIndex];
+      // Prioritize chord tones
+      if (Math.random() < 0.7 && currentChord.length > 0) {
+        return currentChord[Math.floor(Math.random() * currentChord.length)];
+      } else {
+        return scale[currentMelodyIndex];
+      }
     }
 
     function getNextStrategy(currentStrategy, markovMatrix) {
@@ -240,15 +280,16 @@
       return currentStrategy;
     }
 
+    // Updated Chord Strategy Markov Matrix for Smoother Transitions
     const chordStrategyMarkovMatrix = {
-      tonic: { tonic: 0.4, dominant: 0.3, subdominant: 0.1, minor: 0.05, diminished: 0.05, suspended: 0.05, minor7: 0.03, augmented: 0.02 },
-      dominant: { tonic: 0.3, dominant: 0.4, subdominant: 0.1, minor: 0.05, diminished: 0.05, suspended: 0.03, minor7: 0.05, augmented: 0.02 },
-      subdominant: { tonic: 0.3, dominant: 0.3, subdominant: 0.3, minor: 0.05, diminished: 0.05, suspended: 0.02 },
-      minor: { tonic: 0.3, dominant: 0.2, subdominant: 0.2, minor: 0.2, diminished: 0.1, minor7: 0.05 },
-      diminished: { tonic: 0.3, dominant: 0.2, subdominant: 0.1, minor: 0.1, diminished: 0.2 },
-      suspended: { tonic: 0.4, dominant: 0.3, minor: 0.1, suspended: 0.2 },
-      minor7: { tonic: 0.2, minor7: 0.5, minor: 0.3 },
-      augmented: { tonic: 0.4, dominant: 0.3, augmented: 0.3 }
+      tonic: { tonic: 0.3, dominant: 0.4, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
+      dominant: { tonic: 0.5, dominant: 0.2, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
+      subdominant: { tonic: 0.4, dominant: 0.3, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
+      minor: { tonic: 0.4, dominant: 0.3, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
+      diminished: { tonic: 0.4, dominant: 0.3, subdominant: 0.2, minor: 0.05, diminished: 0.025, suspended: 0.025, minor7: 0.0, augmented: 0.0 },
+      suspended: { tonic: 0.5, dominant: 0.3, subdominant: 0.15, minor: 0.025, diminished: 0.025, suspended: 0.0, minor7: 0.0, augmented: 0.0 },
+      minor7: { tonic: 0.5, dominant: 0.3, subdominant: 0.15, minor: 0.025, diminished: 0.025, suspended: 0.0, minor7: 0.0, augmented: 0.0 },
+      augmented: { tonic: 0.5, dominant: 0.3, subdominant: 0.15, minor: 0.025, diminished: 0.025, suspended: 0.0, minor7: 0.0, augmented: 0.0 }
     };
 
     const melodyStrategyMarkovMatrix = {
@@ -296,11 +337,11 @@
       });
     }
 
-    function playMelody(pattern, currentTime) {
+    function playMelody(pattern, currentTime, currentChord) {
       logBox(`>>> Melody Strategy: <span class="melody-strategy">${currentMelodyStrategy.toUpperCase()}</span> <<<`);
       pattern.forEach((beatDuration, index) => {
         const startTime = currentTime + index * beatDuration * secondsPerBeat;
-        const frequency = melodyStrategies[currentMelodyStrategy]();
+        const frequency = melodyStrategies[currentMelodyStrategy](currentChord);
         createOrganOscillator(frequency, startTime, beatDuration * secondsPerBeat, false);
       });
     }
@@ -325,7 +366,7 @@
 
       const rhythmPattern = rhythmPatterns[Math.floor(Math.random() * rhythmPatterns.length)];
       logToConsole(`Rhythm Pattern: <span class="rhythm">${rhythmPattern.join(', ')}</span>`, 'info');
-      playMelody(rhythmPattern, currentTime);
+      playMelody(rhythmPattern, currentTime, chord); // Pass the current chord here
 
       currentChordStrategy = getNextStrategy(currentChordStrategy, chordStrategyMarkovMatrix);
       currentMelodyStrategy = getNextStrategy(currentMelodyStrategy, melodyStrategyMarkovMatrix);
@@ -376,16 +417,16 @@
       document.getElementById('stopButton').disabled = true;
     });
 
-    // Extended Rhythm Patterns
+    // Updated Rhythm Patterns
     const rhythmPatterns = [
       [1, 0.5, 0.5, 1, 0.5, 0.5, 1],
       [1, 1, 0.5, 0.5, 1, 1, 1],
       [0.5, 0.5, 0.5, 0.5, 1, 1],
       [1, 0.25, 0.25, 1, 0.5, 0.5, 1],
       [0.25, 0.25, 0.5, 0.5, 1, 1, 1],
-      [1, 1, 1.5, 0.5, 0.5], // Polyrhythmic pattern
-      [0.75, 0.25, 1, 0.75, 0.25, 0.5], // Dotted rhythms
-      [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5] // Triplets
+      [1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5], // Triplets
+      [1, 0.5, 1, 0.5, 1, 0.5, 1], // Balanced pattern
+      [1, 1, 0.75, 0.25, 1, 1] // Simplified dotted rhythms
     ];
   </script>
 </body>
